@@ -11,7 +11,6 @@ const generateToken = (id) => {
   });
 };
 
-// @desc    Register a new user
 export const registerUser = async (req, res) => {
   const { name, email, password } = req.body;
 
@@ -22,7 +21,6 @@ export const registerUser = async (req, res) => {
       return res.status(400).json({ message: 'User already exists' });
     }
 
-    // Create user
     const user = await User.create({
       name,
       email,
@@ -45,7 +43,6 @@ export const registerUser = async (req, res) => {
   }
 };
 
-// @desc    Authenticate user & get token
 export const loginUser = async (req, res) => {
   const { email, password } = req.body;
 
@@ -68,7 +65,6 @@ export const loginUser = async (req, res) => {
   }
 };
 
-// @desc    Get user profile
 export const getUserProfile = async (req, res) => {
   try {
     const user = await User.findById(req.user._id).select('-password');
@@ -78,7 +74,6 @@ export const getUserProfile = async (req, res) => {
   }
 };
 
-// @desc    Update user profile
 export const updateUserProfile = async (req, res) => {
   try {
     const user = await User.findById(req.user._id);
@@ -100,7 +95,7 @@ export const updateUserProfile = async (req, res) => {
         role: updatedUser.role
       });
     } else {
-      res.status(404).json({ message: 'User not found' });
+      res.status(404).json({ message: 'User not found , backend authController' });
     }
   } catch (error) {
     res.status(500).json({ message: error.message });

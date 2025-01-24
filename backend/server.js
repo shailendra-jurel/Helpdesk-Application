@@ -5,9 +5,9 @@ import 'dotenv/config';
 import mongoose from "mongoose";
 
 //Routes
-import authRoutes from './routes/authRoutes.js';
-import ticketRoutes from './routes/ticketRoutes.js';
-import userRoutes from './routes/userRoutes.js';
+import authRoutes from './routes/authRoute.js';
+import ticketRoutes from './routes/ticketRoute.js';
+import userRoutes from './routes/userRoute.js';
 
 
 

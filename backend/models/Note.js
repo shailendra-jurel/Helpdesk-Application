@@ -1,4 +1,3 @@
-// backend/models/Ticket.js
 import mongoose from 'mongoose';
 
 const NoteSchema = new mongoose.Schema({
@@ -18,5 +17,7 @@ const NoteSchema = new mongoose.Schema({
 }, {
   timestamps: true,
 });
+
+export { NoteSchema }; 
 const Note = mongoose.model('Note', NoteSchema);
 export default Note;

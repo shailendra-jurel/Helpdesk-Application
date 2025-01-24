@@ -1,5 +1,7 @@
 // backend/models/Ticket.js
 import mongoose from 'mongoose';
+import Note, { NoteSchema } from './Note.js';
+
 const TicketSchema = new mongoose.Schema({
   title: {
     type: String,
@@ -19,5 +21,6 @@ const TicketSchema = new mongoose.Schema({
 }, {
   timestamps: true,
 });
+
 const Ticket = mongoose.model('Ticket', TicketSchema);
 export default Ticket;

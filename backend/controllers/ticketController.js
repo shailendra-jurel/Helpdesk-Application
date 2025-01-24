@@ -82,7 +82,7 @@ export const addTicketNote = async (req, res) => {
 
       res.status(201).json(updatedTicket);
     } else {
-      res.status(404).json({ message: 'Ticket not found' });
+      res.status(404).json({ message: 'Ticket not found , ticket Controller' });
     }
   } catch (error) {
     res.status(400).json({ message: error.message });
@@ -95,9 +95,9 @@ export const deleteTicket = async (req, res) => {
 
     if (ticket) {
       await ticket.deleteOne();
-      res.json({ message: 'Ticket removed' });
+      res.json({ message: 'Ticket removed , ticket Controller' });
     } else {
-      res.status(404).json({ message: 'Ticket not found' });
+      res.status(404).json({ message: 'Ticket not found  ticket Controller' });
     }
   } catch (error) {
     res.status(500).json({ message: error.message });
