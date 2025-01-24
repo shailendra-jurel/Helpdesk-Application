@@ -8,7 +8,7 @@ import {
   FaSort, 
   FaSearch 
 } from 'react-icons/fa';
-import { getTickets } from '../store/slices/ticketSlice';
+import { getTickets } from '../Store/slices/ticketSlice';
 
 const TicketList = () => {
   const navigate = useNavigate();
