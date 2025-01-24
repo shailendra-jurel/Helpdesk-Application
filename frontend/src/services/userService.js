@@ -1,63 +1,92 @@
 import axios from 'axios';
+const BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+const API_URL = `${BASE_URL}/api/users/`;
 
-const API_URL = '/api/users/';
+const api = axios.create({
+  baseURL: API_URL,
+  timeout: 5000,
+  headers: {
+    'Content-Type': 'application/json'
+  }
+});
 
-// Get all users
-const getAllUsers = async () => {
-  const response = await axios.get(API_URL, {
-    headers: {
-      Authorization: `Bearer ${localStorage.getItem('token')}`
+api.interceptors.request.use(
+  config => {
+    const token = localStorage.getItem('token');
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
     }
-  });
-  return response.data;
-};
+    return config;
+  },
+  error => Promise.reject(error)
+);
 
-// Create user
-const createUser = async (userData) => {
-  const response = await axios.post(API_URL, userData, {
-    headers: {
-      Authorization: `Bearer ${localStorage.getItem('token')}`
+api.interceptors.response.use(
+  response => response,
+  error => {
+    if (error.response) {
+      switch (error.response.status) {
+        case 401:
+          localStorage.clear();
+          window.location.href = '/login';
+          break;
+        case 403:
+          console.error('Forbidden access');
+          break;
+        case 500:
+          console.error('Server error');
+          break;
+      }
     }
-  });
-  return response.data;
-};
-
-// Update user
-const updateUser = async (userId, userData) => {
-  const response = await axios.put(`${API_URL}${userId}`, userData, {
-    headers: {
-      Authorization: `Bearer ${localStorage.getItem('token')}`
-    }
-  });
-  return response.data;
-};
-
-// Delete user
-const deleteUser = async (userId) => {
-  const response = await axios.delete(`${API_URL}${userId}`, {
-    headers: {
-      Authorization: `Bearer ${localStorage.getItem('token')}`
-    }
-  });
-  return response.data;
-};
-
-// Get user profile
-const getUserProfile = async (userId) => {
-  const response = await axios.get(`${API_URL}profile/${userId}`, {
-    headers: {
-      Authorization: `Bearer ${localStorage.getItem('token')}`
-    }
-  });
-  return response.data;
-};
+    return Promise.reject(error);
+  }
+);
 
 const userService = {
-  getAllUsers,
-  createUser,
-  updateUser,
-  deleteUser,
-  getUserProfile
+  async getAllUsers() {
+    try {
+      const response = await api.get('');
+      return response.data;
+    } catch (error) {
+      throw error.response?.data?.message || 'Failed to fetch users';
+    }
+  },
+
+  async createUser(userData) {
+    try {
+      const response = await api.post('', userData);
+      return response.data;
+    } catch (error) {
+      throw error.response?.data?.message || 'Failed to create user';
+    }
+  },
+
+  async updateUser(userId, userData) {
+    try {
+      const response = await api.put(`${userId}`, userData);
+      return response.data;
+    } catch (error) {
+      throw error.response?.data?.message || 'Failed to update user';
+    }
+  },
+
+  async deleteUser(userId) {
+    try {
+      const response = await api.delete(`${userId}`);
+      return response.data;
+    } catch (error) {
+      throw error.response?.data?.message || 'Failed to delete user';
+    }
+  },
+
+  async getUserProfile(userId) {
+    try {
+      const response = await api.get(`profile/${userId}`);
+      return response.data;
+    } catch (error) {
+      throw error.response?.data?.message || 'Failed to fetch user profile';
+    }
+  }
 };
 
 export default userService;

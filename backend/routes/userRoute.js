@@ -11,13 +11,16 @@ import { protect, admin } from '../middleware/authMiddleware.js';
 
 const router = express.Router();
 
+// All these routes require admin access
+router.use(protect, admin);
+
 router.route('/')
-  .get(protect, admin, getAllUsers)
-  .post(protect, admin, createUser);
+  .get(getAllUsers)
+  .post(createUser);
 
 router.route('/:id')
-  .get(protect, admin, getUserById)
-  .put(protect, admin, updateUser)
-  .delete(protect, admin, deleteUser);
+  .get(getUserById)
+  .put(updateUser)
+  .delete(deleteUser);
 
 export default router;

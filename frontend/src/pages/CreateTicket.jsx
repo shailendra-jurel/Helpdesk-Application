@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
-import { useDispatch } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
-import { createTicket } from '../Store/slices/ticketSlice';
+import { toast } from 'react-toastify';
+import ticketService from '../services/ticketService';
 import { FaTicketAlt } from 'react-icons/fa';
 
 const CreateTicket = () => {
@@ -11,9 +11,10 @@ const CreateTicket = () => {
     priority: 'medium'
   });
 
-  const { title, description, priority } = formData;
-  const dispatch = useDispatch();
   const navigate = useNavigate();
+  const [loading, setLoading] = useState(false);
+
+  const { title, description, priority } = formData;
 
   const onChange = (e) => {
     setFormData((prevState) => ({
@@ -22,10 +23,29 @@ const CreateTicket = () => {
     }));
   };
 
-  const onSubmit = (e) => {
+  const onSubmit = async (e) => {
     e.preventDefault();
-    dispatch(createTicket(formData))
-      .then(() => navigate('/tickets'));
+    
+    if (!title || !description) {
+      toast.error('Please fill in all fields');
+      return;
+    }
+
+    try {
+      setLoading(true);
+      const newTicket = await ticketService.createTicket({
+        title,
+        description,
+        priority
+      });
+
+      toast.success('Ticket created successfully');
+      navigate(`/tickets/${newTicket._id}`);
+    } catch (error) {
+      toast.error(error.message || 'Failed to create ticket');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -37,31 +57,31 @@ const CreateTicket = () => {
           </h2>
           <form onSubmit={onSubmit}>
             <div className="mb-4">
-              <label className="block mb-2">Title</label>
+              <label className="block mb-2 font-medium">Title</label>
               <input
                 type="text"
                 className="w-full px-3 py-2 border rounded-md"
                 name="title"
                 value={title}
                 onChange={onChange}
-                required
                 placeholder="Enter ticket title"
+                required
               />
             </div>
             <div className="mb-4">
-              <label className="block mb-2">Description</label>
+              <label className="block mb-2 font-medium">Description</label>
               <textarea
                 className="w-full px-3 py-2 border rounded-md"
                 name="description"
                 value={description}
                 onChange={onChange}
-                required
+                placeholder="Describe your issue in detail"
                 rows={4}
-                placeholder="Provide detailed description of your issue"
+                required
               />
             </div>
             <div className="mb-6">
-              <label className="block mb-2">Priority</label>
+              <label className="block mb-2 font-medium">Priority</label>
               <select
                 className="w-full px-3 py-2 border rounded-md"
                 name="priority"
@@ -75,9 +95,10 @@ const CreateTicket = () => {
             </div>
             <button
               type="submit"
-              className="w-full bg-primary-500 text-white py-2 rounded-md hover:bg-primary-600 transition"
+              disabled={loading}
+              className="w-full bg-primary-500 text-white py-2 rounded-md hover:bg-primary-600 transition disabled:opacity-50"
             >
-              Create Ticket
+              {loading ? 'Creating...' : 'Create Ticket'}
             </button>
           </form>
         </div>

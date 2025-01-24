@@ -1,63 +1,47 @@
-// src/store/slices/authSlice.js
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import authService from '../../services/authService';
 
-const user = localStorage.getItem('user') 
-  ? JSON.parse(localStorage.getItem('user')) 
-  : null;
-
-const role = localStorage.getItem('role') || null;
+// Safe localStorage parsing
+const getUserFromStorage = () => {
+  try {
+    const user = localStorage.getItem('user');
+    return user ? JSON.parse(user) : null;
+  } catch (error) {
+    localStorage.removeItem('user');
+    return null;
+  }
+};
 
 const initialState = {
-  user,
-  role,
+  user: getUserFromStorage(),
+  role: localStorage.getItem('role') || null,
+  isLoading: false,
   isError: false,
   isSuccess: false,
-  isLoading: false,
   message: ''
 };
 
-// Register user
 export const register = createAsyncThunk(
   'auth/register',
   async (userData, thunkAPI) => {
     try {
-      return await authService.register(userData);
+      const response = await authService.register(userData);
+      return response;
     } catch (error) {
-      const message = 
-        (error.response && 
-         error.response.data && 
-         error.response.data.message) || 
-        error.message || 
-        error.toString();
-      return thunkAPI.rejectWithValue(message);
+      return thunkAPI.rejectWithValue(error);
     }
   }
 );
 
-// Login user
 export const login = createAsyncThunk(
   'auth/login',
   async (userData, thunkAPI) => {
     try {
-      return await authService.login(userData);
+      const response = await authService.login(userData);
+      return response;
     } catch (error) {
-      const message = 
-        (error.response && 
-         error.response.data && 
-         error.response.data.message) || 
-        error.message || 
-        error.toString();
-      return thunkAPI.rejectWithValue(message);
+      return thunkAPI.rejectWithValue(error);
     }
-  }
-);
-
-// Logout user
-export const logout = createAsyncThunk(
-  'auth/logout',
-  async () => {
-    await authService.logout();
   }
 );
 
@@ -67,9 +51,14 @@ const authSlice = createSlice({
   reducers: {
     reset: (state) => {
       state.isLoading = false;
-      state.isSuccess = false;
       state.isError = false;
+      state.isSuccess = false;
       state.message = '';
+    },
+    logout: (state) => {
+      state.user = null;
+      state.role = null;
+      authService.logout();
     }
   },
   extraReducers: (builder) => {
@@ -88,6 +77,7 @@ const authSlice = createSlice({
         state.isError = true;
         state.message = action.payload;
         state.user = null;
+        state.role = null;
       })
       .addCase(login.pending, (state) => {
         state.isLoading = true;
@@ -103,13 +93,10 @@ const authSlice = createSlice({
         state.isError = true;
         state.message = action.payload;
         state.user = null;
-      })
-      .addCase(logout.fulfilled, (state) => {
-        state.user = null;
         state.role = null;
       });
   }
 });
 
-export const { reset } = authSlice.actions;
+export const { reset, logout } = authSlice.actions;
 export default authSlice.reducer;

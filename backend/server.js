@@ -1,4 +1,4 @@
-
+// backend/server.js
 import express from "express";
 import cors from "cors";
 import 'dotenv/config';
@@ -8,9 +8,6 @@ import mongoose from "mongoose";
 import authRoutes from './routes/authRoute.js';
 import ticketRoutes from './routes/ticketRoute.js';
 import userRoutes from './routes/userRoute.js';
-
-
-
 const app = express();
 app.use(cors());
 app.use(express.json());
@@ -25,8 +22,6 @@ app.use(express.json());
 //     });
 //   });
 
-
-
 const connectDB = async () => {
     try {
       const conn = await mongoose.connect(process.env.MONGODB_URI, {
@@ -40,10 +35,7 @@ const connectDB = async () => {
       process.exit(1);
     }
   };
-
   connectDB();
-
-
   // Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/tickets', ticketRoutes);

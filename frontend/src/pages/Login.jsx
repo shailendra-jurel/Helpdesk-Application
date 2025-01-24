@@ -9,6 +9,7 @@ const Login = () => {
     email: '',
     password: ''
   });
+  const [error, setError] = useState('');
 
   const { email, password } = formData;
   const navigate = useNavigate();
@@ -29,10 +30,17 @@ const Login = () => {
     }));
   };
 
-  const onSubmit = (e) => {
+  const onSubmit = async (e) => {
     e.preventDefault();
+    setError('');
+    
     const userData = { email, password };
-    dispatch(login(userData));
+    try {
+      await dispatch(login(userData)).unwrap();
+      navigate('/');
+    } catch (error) {
+      setError(error);
+    }
   };
 
   return (
@@ -41,6 +49,11 @@ const Login = () => {
         <h2 className="text-2xl font-bold mb-6 text-center flex items-center justify-center">
           <FaSignInAlt className="mr-2" /> Login
         </h2>
+        {error && (
+          <div className="mb-4 p-2 bg-red-100 text-red-600 rounded">
+            {error}
+          </div>
+        )}
         <form onSubmit={onSubmit}>
           <div className="mb-4">
             <input

@@ -12,6 +12,7 @@ const Register = () => {
     confirmPassword: '',
     role: 'customer'
   });
+  const [error, setError] = useState('');
 
   const { name, email, password, confirmPassword, role } = formData;
   const navigate = useNavigate();
@@ -32,14 +33,22 @@ const Register = () => {
     }));
   };
 
-  const onSubmit = (e) => {
+  const onSubmit = async (e) => {
     e.preventDefault();
+    setError('');
+    
     if (password !== confirmPassword) {
-      alert('Passwords do not match');
+      setError('Passwords do not match');
       return;
     }
+    
     const userData = { name, email, password, role };
-    dispatch(register(userData));
+    try {
+      await dispatch(register(userData)).unwrap();
+      navigate('/');
+    } catch (error) {
+      setError(error);
+    }
   };
 
   return (
@@ -48,6 +57,11 @@ const Register = () => {
         <h2 className="text-2xl font-bold mb-6 text-center flex items-center justify-center">
           <FaUser className="mr-2" /> Register
         </h2>
+        {error && (
+          <div className="mb-4 p-2 bg-red-100 text-red-600 rounded">
+            {error}
+          </div>
+        )}
         <form onSubmit={onSubmit}>
           <div className="mb-4">
             <input

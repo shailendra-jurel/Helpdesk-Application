@@ -6,13 +6,17 @@ import {
   getUserProfile, 
   updateUserProfile 
 } from '../controllers/authController.js';
-import { protect, admin } from '../Middleware/authMiddleware.js';
+import { protect } from '../Middleware/authMiddleware.js';
 
 const router = express.Router();
 
+// Public routes
 router.post('/register', registerUser);
 router.post('/login', loginUser);
-router.get('/profile', protect, getUserProfile);
-router.put('/profile', protect, updateUserProfile);
+
+// Protected routes
+router.route('/profile')
+  .get(protect, getUserProfile)
+  .put(protect, updateUserProfile);
 
 export default router;

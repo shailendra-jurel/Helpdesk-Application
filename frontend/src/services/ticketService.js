@@ -1,52 +1,83 @@
 import axios from 'axios';
+const BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+const API_URL = `${BASE_URL}/api/tickets`;
 
-const API_URL = '/api/tickets';
+const api = axios.create({
+  baseURL: API_URL,
+  timeout: 5000,
+  headers: {
+    'Content-Type': 'application/json'
+  }
+});
 
-const createTicket = async (ticketData, token) => {
-  const config = {
-    headers: {
-      Authorization: `Bearer ${token}`
+api.interceptors.request.use(
+  config => {
+    const token = localStorage.getItem('token');
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
     }
-  };
-  const response = await axios.post(API_URL, ticketData, config);
-  return response.data;
-};
+    return config;
+  },
+  error => Promise.reject(error)
+);
 
-const getTickets = async (token) => {
-  const config = {
-    headers: {
-      Authorization: `Bearer ${token}`
+api.interceptors.response.use(
+  response => response,
+  error => {
+    if (error.response) {
+      switch (error.response.status) {
+        case 401:
+          localStorage.clear();
+          window.location.href = '/login';
+          break;
+        case 403:
+          console.error('Forbidden access');
+          break;
+        case 500:
+          console.error('Server error');
+          break;
+      }
     }
-  };
-  const response = await axios.get(API_URL, config);
-  return response.data;
-};
-
-const getTicketById = async (ticketId, token) => {
-  const config = {
-    headers: {
-      Authorization: `Bearer ${token}`
-    }
-  };
-  const response = await axios.get(`${API_URL}/${ticketId}`, config);
-  return response.data;
-};
-
-const closeTicket = async (ticketId, token) => {
-  const config = {
-    headers: {
-      Authorization: `Bearer ${token}`
-    }
-  };
-  const response = await axios.put(`${API_URL}/${ticketId}/close`, {}, config);
-  return response.data;
-};
+    return Promise.reject(error);
+  }
+);
 
 const ticketService = {
-  createTicket,
-  getTickets,
-  getTicketById,
-  closeTicket
+  async createTicket(ticketData) {
+    try {
+      const response = await api.post('', ticketData);
+      return response.data;
+    } catch (error) {
+      throw error.response?.data?.message || 'Failed to create ticket';
+    }
+  },
+
+  async getTickets() {
+    try {
+      const response = await api.get('');
+      return response.data;
+    } catch (error) {
+      throw error.response?.data?.message || 'Failed to fetch tickets';
+    }
+  },
+
+  async getTicket(id) {
+    try {
+      const response = await api.get(`/${id}`);
+      return response.data;
+    } catch (error) {
+      throw error.response?.data?.message || 'Failed to fetch ticket';
+    }
+  },
+
+  async closeTicket(id) {
+    try {
+      const response = await api.put(`/${id}/close`);
+      return response.data;
+    } catch (error) {
+      throw error.response?.data?.message || 'Failed to close ticket';
+    }
+  },
 };
 
 export default ticketService;
