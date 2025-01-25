@@ -9,7 +9,17 @@ import authRoutes from './routes/authRoute.js';
 import ticketRoutes from './routes/ticketRoute.js';
 import userRoutes from './routes/userRoute.js';
 const app = express();
-app.use(cors());
+// Middleware
+app.use(cors({
+  origin: [
+    'http://localhost:5173',  // Vite dev server
+    'http://localhost:3000',  // Potential React dev server
+    'http://localhost:5000'   // Potential backend server
+  ],
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization']
+}));
 app.use(express.json());
 
 // Error handling middleware

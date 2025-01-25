@@ -10,7 +10,7 @@ const initialState = {
 };
 
 export const createTicket = createAsyncThunk(
-  'tickets/create',
+  'ticket/create',
   async (ticketData, thunkAPI) => {
     try {
       return await ticketService.createTicket(ticketData);
@@ -21,7 +21,7 @@ export const createTicket = createAsyncThunk(
 );
 
 export const getTickets = createAsyncThunk(
-  'tickets/getAll',
+  'ticket/getAll',
   async (_, thunkAPI) => {
     try {
       return await ticketService.getTickets();

@@ -5,7 +5,7 @@ import store from './Store/store';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import Dashboard from './pages/Dashboard';
-import ProtectedRoutes from './ProtectedRoutes';
+import ProtectedRoute from './ProtectedRoutes';
 import TicketList from './pages/TicketList';
 import CreateTicket from './pages/CreateTicket';
 import TicketDetails from './pages/TicketDetails';
@@ -19,16 +19,17 @@ function App() {
           <Route path="/register" element={<Register />} />
 
           {/* Protected Routes for all roles */}
-          {/* <Route element={<ProtectedRoute allowedRoles={['customer', 'agent', 'admin']} />}> */}
-         <Route>
-            <Route path="/" element={<Dashboard/>} />
-            <Route path="/tickets" element={<TicketList />} />
-            <Route path="/tickets/create" element={<CreateTicket />} />
-            <Route path="/tickets/:id" element={<TicketDetails />} />
-          </Route>
+         
+            {/* <Route element={<ProtectedRoute allowedRoles={['customer', 'agent', 'admin']} />}> */}
+            <Route>
+          <Route path="/" element={<Dashboard />} />
+          <Route path="/tickets" element={<TicketList />} />
+          <Route path="/tickets/create" element={<CreateTicket />} />
+          <Route path="/tickets/:id" element={<TicketDetails />} />
+        </Route>
 
           {/* <Route element={<ProtectedRoute allowedRoles={['admin']} />}> */}
-       <Route>
+          <Route>
             <Route path="/admin" element={<AdminPanel />} />
           </Route>
         </Routes>

@@ -6,7 +6,8 @@ import {
   FaTicketAlt, 
   FaFilter, 
   FaSort, 
-  FaSearch 
+  FaSearch,
+  FaClipboardList 
 } from 'react-icons/fa';
 import { getTickets } from '../Store/slices/ticketSlice';
 
@@ -14,7 +15,7 @@ const TicketList = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const { user } = useSelector((state) => state.auth);
-  const { tickets, isLoading } = useSelector((state) => state.ticket);
+  const { tickets, isLoading, isError, message } = useSelector((state) => state.ticket);
 
   const [filteredTickets, setFilteredTickets] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
@@ -28,7 +29,7 @@ const TicketList = () => {
   }, [dispatch]);
 
   useEffect(() => {
-    let result = user.role === 'customer'
+    let result = user && user.role === 'customer'
       ? tickets.filter(ticket => ticket.userId === user._id)
       : tickets;
 
@@ -71,7 +72,7 @@ const TicketList = () => {
     };
     return (
       <span className={`px-2 py-1 rounded text-xs ${statusColors[status]}`}>
-        {status}
+        {status.replace('-', ' ')}
       </span>
     );
   };
@@ -89,19 +90,36 @@ const TicketList = () => {
     );
   };
 
+  if (isError) {
+    return (
+      <div className="min-h-screen bg-red-100 flex items-center justify-center">
+        <div className="bg-white p-8 rounded-lg shadow-md text-center">
+          <h2 className="text-2xl font-bold text-red-600 mb-4">Error Loading Tickets</h2>
+          <p className="text-gray-700">{message}</p>
+          <button 
+            onClick={() => dispatch(getTickets())} 
+            className="mt-4 bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
+          >
+            Retry
+          </button>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-gray-100 p-6">
       <div className="container mx-auto">
         {/* Header */}
         <div className="flex justify-between items-center mb-6">
           <h1 className="text-3xl font-bold flex items-center">
-            <FaTicketAlt className="mr-2" /> 
-            {user.role === 'customer' ? 'My Tickets' : 'All Tickets'}
+            <FaClipboardList className="mr-2 text-primary-500" /> 
+            {user && user.role === 'customer' ? 'My Tickets' : 'All Tickets'}
           </h1>
-          {user.role !== 'admin' && (
+          {user && user.role !== 'admin' && (
             <Link 
               to="/tickets/create" 
-              className="bg-primary-500 text-white px-4 py-2 rounded flex items-center hover:bg-primary-600"
+              className="bg-primary-500 text-white px-4 py-2 rounded flex items-center hover:bg-primary-600 transition-colors"
             >
               <FaPlus className="mr-2" /> Create Ticket
             </Link>
@@ -117,14 +135,14 @@ const TicketList = () => {
               placeholder="Search tickets..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 border rounded"
+              className="w-full pl-10 pr-4 py-2 border rounded focus:ring-2 focus:ring-primary-300"
             />
           </div>
           
           <select
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value)}
-            className="w-full px-4 py-2 border rounded"
+            className="w-full px-4 py-2 border rounded focus:ring-2 focus:ring-primary-300"
           >
             <option value="all">All Statuses</option>
             <option value="open">Open</option>
@@ -135,7 +153,7 @@ const TicketList = () => {
           <select
             value={priorityFilter}
             onChange={(e) => setPriorityFilter(e.target.value)}
-            className="w-full px-4 py-2 border rounded"
+            className="w-full px-4 py-2 border rounded focus:ring-2 focus:ring-primary-300"
           >
             <option value="all">All Priorities</option>
             <option value="low">Low</option>
@@ -147,14 +165,14 @@ const TicketList = () => {
             <select
               value={sortBy}
               onChange={(e) => setSortBy(e.target.value)}
-              className="w-full px-4 py-2 border rounded"
+              className="w-full px-4 py-2 border rounded focus:ring-2 focus:ring-primary-300"
             >
               <option value="createdAt">Created Date</option>
               <option value="priority">Priority</option>
             </select>
             <button
               onClick={() => setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc')}
-              className="bg-gray-200 p-2 rounded"
+              className="bg-gray-200 p-2 rounded hover:bg-gray-300 transition-colors"
             >
               <FaSort className={`transform ${sortOrder === 'asc' ? 'rotate-180' : ''}`} />
             </button>
@@ -163,10 +181,13 @@ const TicketList = () => {
 
         {/* Ticket List */}
         {isLoading ? (
-          <div className="text-center py-10">Loading tickets...</div>
+          <div className="flex justify-center items-center min-h-[300px]">
+            <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-primary-500"></div>
+          </div>
         ) : filteredTickets.length === 0 ? (
           <div className="bg-white shadow rounded-lg p-10 text-center text-gray-500">
-            No tickets found
+            <FaTicketAlt className="mx-auto text-4xl mb-4 text-gray-300" />
+            <p>No tickets found</p>
           </div>
         ) : (
           <div className="bg-white shadow rounded-lg overflow-x-auto">
@@ -184,10 +205,10 @@ const TicketList = () => {
                 {filteredTickets.map((ticket) => (
                   <tr 
                     key={ticket._id} 
-                    className="border-b hover:bg-gray-100 cursor-pointer"
+                    className="border-b hover:bg-gray-100 cursor-pointer transition-colors"
                     onClick={() => navigate(`/tickets/${ticket._id}`)}
                   >
-                    <td className="p-3">{ticket._id.slice(-6)}</td>
+                    <td className="p-3 font-mono">#{ticket._id.slice(-6)}</td>
                     <td className="p-3">{ticket.title}</td>
                     <td className="p-3">{renderStatusBadge(ticket.status)}</td>
                     <td className="p-3">{renderPriorityBadge(ticket.priority)}</td>

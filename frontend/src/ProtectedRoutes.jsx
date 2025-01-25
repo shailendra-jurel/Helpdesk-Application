@@ -1,31 +1,26 @@
+import React from 'react';
 import { Navigate, Outlet, useLocation } from 'react-router-dom';
-import { useSelector } from 'react-redux';
-import PropTypes from 'prop-types';
+import authService from './services/authService';
 
-const ProtectedRoute = ({ allowedRoles }) => {
-  const { user, isLoading } = useSelector((state) => state.auth);
+const ProtectedRoute = ({ allowedRoles = [] }) => {
   const location = useLocation();
+  const token = localStorage.getItem('token');
+  const user = JSON.parse(localStorage.getItem('user'));
 
-  // Guard: Show loading screen if state is still loading
-  if (isLoading) {
-    return <div>Loading...</div>;
-  }
-
-  // Guard: Redirect if user is not logged in or token is missing
-  if (!user || !localStorage.getItem('token')) {
+  // No token or invalid token
+  if (!token || !authService.isTokenValid()) {
     return <Navigate to="/login" state={{ from: location }} replace />;
   }
 
-  // Guard: Redirect if user role is not allowed
-  if (allowedRoles && !allowedRoles.includes(user.role)) {
-    return <Navigate to="/" replace />;
+  // Role-based access control
+  if (allowedRoles.length > 0) {
+    const userRole = user?.role || '';
+    if (!allowedRoles.includes(userRole)) {
+      return <Navigate to="/" replace />;
+    }
   }
 
   return <Outlet />;
-};
-
-ProtectedRoute.propTypes = {
-  allowedRoles: PropTypes.arrayOf(PropTypes.string).isRequired,
 };
 
 export default ProtectedRoute;

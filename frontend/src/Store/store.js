@@ -6,7 +6,7 @@ import userReducer from './slices/userSlice';
  const store = configureStore({
   reducer: {
     auth: authReducer,
-    tickets: ticketReducer,
+    ticket: ticketReducer,
     users: userReducer,
   },
   middleware: (getDefaultMiddleware) => 

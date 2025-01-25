@@ -1,5 +1,3 @@
-
-// backend/routes/ticketRoutes.js
 import express from 'express';
 import { 
   createTicket, 
@@ -9,20 +7,22 @@ import {
   addTicketNote,
   deleteTicket 
 } from '../controllers/ticketController.js';
-import { protect, admin } from '../middleware/authMiddleware.js';
+import { protect } from '../Middleware/authMiddleware.js';
 
 const router = express.Router();
 
+router.use(protect);
+
 router.route('/')
-  .post(protect, createTicket)
-  .get(protect, getTickets);
+  .post(createTicket)
+  .get(getTickets);
 
 router.route('/:id')
-  .get(protect, getTicketById)
-  .put(protect, updateTicket)
-  .delete(protect, deleteTicket);
+  .get(getTicketById)
+  .put(updateTicket)
+  .delete(deleteTicket);
 
 router.route('/:id/notes')
-  .post(protect, addTicketNote);
+  .post(addTicketNote);
 
 export default router;
