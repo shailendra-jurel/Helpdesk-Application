@@ -1,3 +1,4 @@
+// frontend/src/Store/slices/ticketSlice.js
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import ticketService from '../../services/ticketService';
 

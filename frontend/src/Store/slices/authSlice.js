@@ -1,20 +1,21 @@
+// frontend/src/Store/slices/authSlice.js
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import authService from '../../services/authService';
 
 // Safe localStorage parsing
 const getUserFromStorage = () => {
   try {
-    const user = localStorage.getItem('user');
+    const user = localStorage.getItem('helpdesk_user');
     return user ? JSON.parse(user) : null;
   } catch (error) {
-    localStorage.removeItem('user');
+    localStorage.removeItem('helpdesk_user');
     return null;
   }
 };
 
 const initialState = {
   user: getUserFromStorage(),
-  role: localStorage.getItem('role') || null,
+  role: localStorage.getItem('helpdesk_role') || null,
   isLoading: false,
   isError: false,
   isSuccess: false,
@@ -58,6 +59,9 @@ const authSlice = createSlice({
     logout: (state) => {
       state.user = null;
       state.role = null;
+      state.isSuccess = false;
+      state.isError = false;
+      state.message = '';
       authService.logout();
     }
   },
@@ -65,11 +69,18 @@ const authSlice = createSlice({
     builder
       .addCase(register.pending, (state) => {
         state.isLoading = true;
+        state.isError = false;
       })
       .addCase(register.fulfilled, (state, action) => {
         state.isLoading = false;
         state.isSuccess = true;
-        state.user = action.payload.user;
+        state.isError = false;
+        state.user = action.payload.user || {
+          id: action.payload._id,
+          name: action.payload.name,
+          email: action.payload.email,
+          role: action.payload.role
+        };
         state.role = action.payload.role;
       })
       .addCase(register.rejected, (state, action) => {
@@ -81,10 +92,12 @@ const authSlice = createSlice({
       })
       .addCase(login.pending, (state) => {
         state.isLoading = true;
+        state.isError = false;
       })
       .addCase(login.fulfilled, (state, action) => {
         state.isLoading = false;
         state.isSuccess = true;
+        state.isError = false;
         state.user = action.payload.user;
         state.role = action.payload.role;
       })

@@ -1,4 +1,4 @@
-// services/authService.js
+// frontend/src/services/authService.js
 import axios from 'axios';
 // import jwtDecode from 'jwt-decode';
 // import jwtDecode from 'jwt-decode/build/jwt-decode.esm.js';
@@ -48,17 +48,28 @@ api.interceptors.response.use(
 );
 
 const authService = {
+  async refreshToken() {
+    try {
+      const response = await api.post('/refresh-token');  // don't have such route in backend
+      localStorage.setItem('token', response.data.token);
+      return response.data.token;
+    } catch (error) {
+      this.logout();
+      throw error;
+    }
+  },
   async register(userData) {
     try {
       const response = await api.post('/register', userData);
-      if (response.data?.token) {
+      if (response.data) {
         localStorage.setItem('token', response.data.token);
-        localStorage.setItem('user', JSON.stringify({
+        localStorage.setItem('helpdesk_user', JSON.stringify({
           id: response.data._id,
           name: response.data.name,
           email: response.data.email,
           role: response.data.role
         }));
+        localStorage.setItem('helpdesk_role', response.data.role);
       }
       return response.data;
     } catch (error) {
@@ -69,29 +80,36 @@ const authService = {
   async login(userData) {
     try {
       const response = await api.post('/login', userData);
-      const { token, _id, name, email, role } = response.data;
-      
-      if (token) {
-        localStorage.clear(); // Clear previous session
-        
-        localStorage.setItem('token', token);
-        localStorage.setItem('user', JSON.stringify({
-          id: _id,
-          name,
-          email,
-          role
+      if (response.data) {
+        localStorage.setItem('token', response.data.token);
+        localStorage.setItem('helpdesk_user', JSON.stringify({
+          id: response.data._id,
+          name: response.data.name,
+          email: response.data.email,
+          role: response.data.role
         }));
+        localStorage.setItem('helpdesk_role', response.data.role);
       }
-      return response.data;
+      return {
+        user: {
+          id: response.data._id,
+          name: response.data.name,
+          email: response.data.email,
+          role: response.data.role
+        },
+        role: response.data.role
+      };
     } catch (error) {
-      console.error('Login error:', error.response?.data);
       throw error.response?.data?.message || 'Login failed';
     }
   },
 
   logout() {
-    localStorage.removeItem('user');
     localStorage.removeItem('token');
+    localStorage.removeItem('helpdesk_user');
+    localStorage.removeItem('helpdesk_role');
+    // Optional: Clear any Redux store user state
+  // store.dispatch(clearUserAction());    want to implement this also   but getting error
     window.location.href = '/login';
   },
 
@@ -100,17 +118,27 @@ const authService = {
     if (!token) return false;
 
     try {
-      // Manual token expiration check
-      const base64Url = token.split('.')[1];
-      const base64 = base64Url.replace('-', '+').replace('_', '/');
-      const payload = JSON.parse(window.atob(base64));
+      const payload = this.decodeToken(token);
+      const isExpired = payload.exp * 1000 < Date.now();
       
-      return payload.exp * 1000 > Date.now();
+      // Auto refresh if close to expiration
+      if (isExpired || (payload.exp * 1000 - Date.now() < 5 * 60 * 1000)) {
+        this.refreshToken();
+      }
+
+      return !isExpired;
     } catch (error) {
-      console.error('Token validation error:', error);
+      this.logout();
       return false;
     }
-  }
+  },
+
+  decodeToken(token) {
+    const base64Url = token.split('.')[1];
+    const base64 = base64Url.replace('-', '+').replace('_', '/');
+    return JSON.parse(window.atob(base64));
+  },
+
 };
 
 export default authService;

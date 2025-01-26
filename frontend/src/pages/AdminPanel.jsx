@@ -1,8 +1,23 @@
 import React, { useState, useEffect } from 'react';
-import { FaUsers, FaTicketAlt, FaChartBar, FaCog } from 'react-icons/fa';
+import { 
+  LucideUsers, 
+  LucideTicket, 
+  LucideBarChart2, 
+  LucideCog 
+} from 'lucide-react';
 import UserManagement from './UserManagement';
 import ticketService from '../services/ticketService';
 import userService from '../services/userService';
+
+const StatCard = ({ icon: Icon, title, value, color }) => (
+  <div className="bg-white dark:bg-gray-800 shadow-md rounded-lg p-6 flex items-center">
+    <Icon className={`text-4xl ${color} mr-4`} />
+    <div>
+      <h3 className="text-xl font-semibold dark:text-gray-200">{title}</h3>
+      <p className="text-3xl font-bold dark:text-gray-100">{value}</p>
+    </div>
+  </div>
+);
 
 const AdminPanel = () => {
   const [activeTab, setActiveTab] = useState('dashboard');
@@ -41,24 +56,28 @@ const AdminPanel = () => {
         return (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             <StatCard 
-              icon={<FaTicketAlt className="text-4xl text-primary-500 mr-4" />}
+              icon={LucideTicket}
               title="Total Tickets"
               value={stats.totalTickets}
+              color="text-blue-500"
             />
             <StatCard 
-              icon={<FaUsers className="text-4xl text-green-500 mr-4" />}
+              icon={LucideUsers}
               title="Total Users"
               value={stats.totalUsers}
+              color="text-green-500"
             />
             <StatCard 
-              icon={<FaTicketAlt className="text-4xl text-yellow-500 mr-4" />}
+              icon={LucideTicket}
               title="Open Tickets"
               value={stats.openTickets}
+              color="text-yellow-500"
             />
             <StatCard 
-              icon={<FaTicketAlt className="text-4xl text-red-500 mr-4" />}
+              icon={LucideTicket}
               title="Closed Tickets"
               value={stats.closedTickets}
+              color="text-red-500"
             />
           </div>
         );
@@ -69,48 +88,45 @@ const AdminPanel = () => {
     }
   };
 
-  return (
-    <div className="min-h-screen bg-gray-100 p-6">
-      <div className="container mx-auto">
-        <h1 className="text-3xl font-bold mb-6">Admin Dashboard</h1>
-        
-        <div className="mb-6">
-          <div className="flex space-x-4 bg-white rounded-lg shadow-md">
-            {[
-              { tab: 'dashboard', icon: FaChartBar, label: 'Dashboard' },
-              { tab: 'users', icon: FaUsers, label: 'User Management' }
-            ].map(({ tab, icon: Icon, label }) => (
-              <button
-                key={tab}
-                onClick={() => setActiveTab(tab)}
-                className={`flex items-center p-4 ${
-                  activeTab === tab 
-                    ? 'text-primary-500 border-b-2 border-primary-500' 
-                    : 'text-gray-600 hover:text-primary-500'
-                }`}
-              >
-                <Icon className="mr-2" /> {label}
-              </button>
-            ))}
-          </div>
-        </div>
+  const tabs = [
+    { 
+      tab: 'dashboard', 
+      icon: LucideBarChart2, 
+      label: 'Dashboard' 
+    },
+    { 
+      tab: 'users', 
+      icon: LucideUsers, 
+      label: 'User Management' 
+    }
+  ];
 
-        <div className="mt-6">
-          {renderContent()}
+  return (
+    <div className="space-y-6">
+      <div className="mb-6">
+        <div className="flex space-x-4 bg-white dark:bg-gray-800 rounded-lg shadow-md">
+          {tabs.map(({ tab, icon: Icon, label }) => (
+            <button
+              key={tab}
+              onClick={() => setActiveTab(tab)}
+              className={`
+                flex items-center p-4 
+                ${activeTab === tab 
+                  ? 'text-blue-500 border-b-2 border-blue-500' 
+                  : 'text-gray-600 dark:text-gray-300 hover:text-blue-500'}
+              `}
+            >
+              <Icon className="mr-2" /> {label}
+            </button>
+          ))}
         </div>
+      </div>
+
+      <div>
+        {renderContent()}
       </div>
     </div>
   );
 };
-
-const StatCard = ({ icon, title, value }) => (
-  <div className="bg-white shadow-md rounded-lg p-6 flex items-center">
-    {icon}
-    <div>
-      <h3 className="text-xl font-semibold">{title}</h3>
-      <p className="text-3xl font-bold">{value}</p>
-    </div>
-  </div>
-);
 
 export default AdminPanel;

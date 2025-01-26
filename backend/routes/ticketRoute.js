@@ -5,8 +5,13 @@ import {
   getTicketById, 
   updateTicket, 
   addTicketNote,
-  deleteTicket 
+  deleteTicket ,
+  getTicketStats,
+  getPriorityDistribution,
+  getUserPerformance,
+  getMissedSLATickets
 } from '../controllers/ticketController.js';
+
 import { protect } from '../Middleware/authMiddleware.js';
 
 const router = express.Router();
@@ -24,5 +29,10 @@ router.route('/:id')
 
 router.route('/:id/notes')
   .post(addTicketNote);
+
+router.get('/stats', getTicketStats);
+router.get('/priority-distribution', getPriorityDistribution);
+router.get('/user-performance',getUserPerformance);
+router.get('/missed-sla-tickets', getMissedSLATickets);
 
 export default router;

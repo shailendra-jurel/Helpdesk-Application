@@ -46,3 +46,16 @@ export const checkRole = (roles) => {
     next();
   };
 };
+
+
+
+
+// Middleware to update SLA breach date      ticket controller  part   
+export const updateSLABreach = async (ticket) => {
+  const standardSLADays = 3; // Adjust based on your business rules
+  const slaBreachDate = new Date(ticket.createdAt);
+  slaBreachDate.setDate(slaBreachDate.getDate() + standardSLADays);
+  
+  ticket.slaBreachDate = slaBreachDate;
+  await ticket.save();
+};

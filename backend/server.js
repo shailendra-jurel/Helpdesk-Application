@@ -23,14 +23,15 @@ app.use(cors({
 app.use(express.json());
 
 // Error handling middleware
-// app.use((err, req, res, next) => {
-//     const statusCode = res.statusCode === 200 ? 500 : res.statusCode;
-//     res.status(statusCode);
-//     res.json({
-//       message: err.message,
-//       stack: process.env.NODE_ENV === 'production' ? null : err.stack,
-//     });
-//   });
+app.use((err, req, res, next) => {
+  console.error('Unhandled Error:', err);  // Log the full error
+  const statusCode = err.status || 500;
+  res.status(statusCode);
+  res.json({
+    message: err.message,
+    stack: process.env.NODE_ENV === 'production' ? null : err.stack,
+  });
+});
 
 const connectDB = async () => {
     try {
@@ -52,11 +53,11 @@ app.use('/api/tickets', ticketRoutes);
 app.use('/api/users', userRoutes);
 
 
-const PORT =  process.env.PORT || 3000;
+const PORT = process.env.PORT ||  5001 || 5002;
 app.get("/", (req, res) => { 
   res.send("Hello World!");
 });
 
 app.listen(PORT, () => {
-  console.log("Server is running on port 3000");
+  console.log(`Server is running on port  ${PORT}`);
 });

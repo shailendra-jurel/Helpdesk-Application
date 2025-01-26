@@ -1,5 +1,5 @@
 import axios from 'axios';
-const BASE_URL =  'http://localhost:5000';
+const BASE_URL = 'http://localhost:5000';
 const API_URL = `${BASE_URL}/api/tickets`;
 
 const api = axios.create({
@@ -78,6 +78,76 @@ const ticketService = {
       throw error.response?.data?.message || 'Failed to close ticket';
     }
   },
+
+  // New methods for dashboard
+  async getPriorityDistribution() {
+    try {
+      const response = await api.get('/priority-distribution');
+      console.log('Priority Distribution Response:', response.data);
+
+      return response.data || [
+        { name: 'Low', value: 0 },
+        { name: 'Medium', value: 0 },
+        { name: 'High', value: 0 }
+      ];
+    } catch (error) {
+      console.error('Priority Distribution Error:', error.response?.data || error.message);
+      return [
+        { name: 'Low', value: 0 },
+        { name: 'Medium', value: 0 },
+        { name: 'High', value: 0 }
+      ];
+    }
+  },
+
+  async getUserPerformance() {
+    try {
+      const response = await api.get('/user-performance');
+      console.log('User Performance Response:', response.data);
+
+      return response.data || [];
+    } catch (error) {
+      console.error('User Performance Error:', error.response?.data || error.message);
+      return [];
+    }
+  },
+
+  async getMissedSLATickets() {
+    try {
+      const response = await api.get('/missed-sla-tickets');
+      console.log('Missed SLA tickets Response:', response.data);
+
+      return response.data || [];
+    } catch (error) {
+      console.error('Missed SLA Tickets Error:', error.response?.data || error.message);
+      return [];
+    }
+  }
+,
+  // Helper method to get ticket stats
+  async getTicketStats() {
+    try {
+      const response = await api.get('/stats');
+      console.log('Ticket Stats Response:', response.data);
+
+      return response.data || {
+        total: 0,
+        open: 0,
+        inProgress: 0,
+        closed: 0,
+        critical: 0
+      };
+    } catch (error) {
+      console.error('Failed to fetch ticket stats', error);
+      return {
+        total: 0,
+        open: 0,
+        inProgress: 0,
+        closed: 0,
+        critical: 0
+      };
+    }
+  }
 };
 
 export default ticketService;

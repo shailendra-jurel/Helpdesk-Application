@@ -1,3 +1,4 @@
+// frontend/src/pages/UserManagement.jsx
 import React, { useState, useEffect } from 'react';
 import { FaUserPlus, FaTrash, FaEdit } from 'react-icons/fa';
 
