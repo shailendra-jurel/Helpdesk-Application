@@ -13,7 +13,7 @@ const app = express();
 const allowedOrigins = [
   'http://localhost:5173', // Vite dev server (development)
   'http://localhost:3000', // React dev server (optional)
-  process.env.VERCEL_URL || 'https://helpdesk-application.vercel.app'
+   'https://helpdesk-application.vercel.app'
 ];
 
 app.use(cors({
