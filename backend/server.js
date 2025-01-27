@@ -10,15 +10,24 @@ import ticketRoutes from './routes/ticketRoute.js';
 import userRoutes from './routes/userRoute.js';
 const app = express();
 // Middleware
+const allowedOrigins = [
+  'http://localhost:5173', // Vite dev server (development)
+  'http://localhost:3000', // React dev server (optional)
+  process.env.VERCEL_URL || 'https://your-frontend.vercel.app'
+];
+
 app.use(cors({
-  origin: [
-    'http://localhost:5173',  // Vite dev server
-    'http://localhost:3000',  // Potential React dev server
-    'http://localhost:5000'   // Potential backend server
-  ],
+  origin: (origin, callback) => {
+    // Allow requests with no origin (like mobile apps, server-to-server)
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error(`CORS policy does not allow access from origin ${origin}`));
+    }
+  },
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization']
+  allowedHeaders: ['Content-Type', 'Authorization'],
 }));
 app.use(express.json());
 
