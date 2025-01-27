@@ -11,10 +11,12 @@ import {
   getUserPerformance,
   getMissedSLATickets
 } from '../controllers/ticketController.js';
-
+import corsMiddleware from '../Middleware/cors.js';
 import { protect } from '../Middleware/authMiddleware.js';
 
 const router = express.Router();
+
+router.use(corsMiddleware);
 
 router.use(protect);
 

@@ -5,9 +5,11 @@ const API_URL = `${BASE_URL}/api/tickets`;
 
 const api = axios.create({
   baseURL: API_URL,
-  timeout: 10000,
+  timeout: 30000,
+  withCredentials: true,
   headers: {
-    'Content-Type': 'application/json'
+      'Content-Type': 'application/json',
+      'Accept': 'application/json'
   }
 });
 

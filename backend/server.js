@@ -13,7 +13,7 @@ const app = express();
 const allowedOrigins = [
   'http://localhost:5173', // Vite dev server (development)
   'http://localhost:3000', // React dev server (optional)
-  process.env.VERCEL_URL || 'https://your-frontend.vercel.app'
+  process.env.VERCEL_URL || 'https://helpdesk-application.vercel.app'
 ];
 
 app.use(cors({
@@ -30,6 +30,7 @@ app.use(cors({
   allowedHeaders: ['Content-Type', 'Authorization'],
 }));
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
 // Error handling middleware
 app.use((err, req, res, next) => {
@@ -65,6 +66,10 @@ app.use('/api/users', userRoutes);
 const PORT = process.env.PORT ||  5001 || 5002;
 app.get("/", (req, res) => { 
   res.send("Hello World!");
+});
+
+app.get('/health', (req, res) => {
+  res.status(200).json({ status: 'OK' });
 });
 
 app.listen(PORT, () => {
