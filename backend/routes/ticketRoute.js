@@ -19,8 +19,14 @@ const router = express.Router();
 router.use(protect);
 
 router.route('/')
-  .post(createTicket)
-  .get(getTickets);
+.post(createTicket)
+.get(getTickets);
+
+router.get('/stats', getTicketStats);
+router.get('/priority-distribution', getPriorityDistribution);
+router.get('/user-performance',getUserPerformance);
+router.get('/missed-sla-tickets', getMissedSLATickets);
+
 
 router.route('/:id')
   .get(getTicketById)
@@ -30,9 +36,5 @@ router.route('/:id')
 router.route('/:id/notes')
   .post(addTicketNote);
 
-router.get('/stats', getTicketStats);
-router.get('/priority-distribution', getPriorityDistribution);
-router.get('/user-performance',getUserPerformance);
-router.get('/missed-sla-tickets', getMissedSLATickets);
 
 export default router;

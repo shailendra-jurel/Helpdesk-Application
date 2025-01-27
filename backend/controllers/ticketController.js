@@ -129,7 +129,7 @@ export const getMissedSLATickets = async (req, res) => {
     const now = new Date();
     const missedSLATickets = await Ticket.find({
       status: { $ne: 'closed' },
-      slaBreachDate: { $lt: now }
+      slaBreachDate: { $exists: true, $ne: null, $lt: now }
     })
     .populate('customer', 'name')
     .populate('assignedAgent', 'name')
@@ -140,8 +140,10 @@ export const getMissedSLATickets = async (req, res) => {
     res.json(missedSLATickets);
   } catch (error) {
     console.error('Error in getMissedSLATickets:', error);
-
-    res.status(500).json({ message: 'Failed to fetch missed SLA tickets' });
+    res.status(500).json({ 
+      message: 'Failed to fetch missed SLA tickets',
+      error: error.message 
+    });
   }
 };
 
@@ -149,7 +151,11 @@ export const getMissedSLATickets = async (req, res) => {
 export const getUserPerformance = async (req, res) => {
   try {
     const userPerformance = await Ticket.aggregate([
-      { $match: { status: 'closed' } },
+      { $match: { 
+        status: 'closed',
+        assignedAgent: { $exists: true, $ne: null } // Only include tickets with agents
+      } 
+    },
       { 
         $group: { 
           _id: '$assignedAgent', 
@@ -185,17 +191,21 @@ export const getUserPerformance = async (req, res) => {
 
     res.json(userPerformance);
   } catch (error) {
-    res.status(500).json({ message: 'Failed to fetch user performance' });
+    console.error('Error in getUserPerformance:', error);
+    res.status(500).json({ 
+      message: 'Failed to fetch user performance',
+      error: error.message 
+    });
   }
 };
 export const getPriorityDistribution = async (req, res) => {
   try {
     const priorityDistribution = await Ticket.aggregate([
       { 
-        $group: { 
-          _id: '$priority', 
-          count: { $sum: 1 } 
-        } 
+        $group: {
+          _id: { $ifNull: ['$priority', 'unassigned'] }, // Handle null priorities
+          count: { $sum: 1 }
+        }
       },
       {
         $project: {
@@ -218,8 +228,10 @@ export const getPriorityDistribution = async (req, res) => {
     res.json(priorityDistribution);
   } catch (error) {
     console.error('Error in getPriorityDistribution:', error);
-
-    res.status(500).json({ message: 'Failed to fetch priority distribution' });
+    res.status(500).json({ 
+      message: 'Failed to fetch priority distribution',
+      error: error.message 
+    });
   }
 };
 

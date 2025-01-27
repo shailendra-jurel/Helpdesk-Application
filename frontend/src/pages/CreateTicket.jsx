@@ -55,6 +55,11 @@ const Button = ({ children, variant = 'primary', className = '', icon: Icon, ...
       `}
       {...props}
     >
+
+
+
+
+
       {Icon && <Icon className="w-5 h-5" />}
       {children}
     </button>
@@ -156,7 +161,9 @@ const CreateTicket = () => {
               variant="outline"
               icon={LucideChevronLeft}
               onClick={() => navigate('/dashboard')}
-            />
+            >
+              Back
+            </Button>
             <h1 className="text-3xl font-bold">Create Ticket</h1>
           </div>
           <div className="flex space-x-4">
