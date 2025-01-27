@@ -3,10 +3,11 @@ import axios from 'axios';
 // import jwtDecode from 'jwt-decode';
 // import jwtDecode from 'jwt-decode/build/jwt-decode.esm.js';
 
-const BASE_URL =  'http://localhost:5000/api/auth';
-
+// const BASE_URL =  'http://localhost:5000/api/auth';
+const BASE_URL = import.meta.env.VITE_API_URL;
+const API_URL = `${BASE_URL}/api/auth`;
 const api = axios.create({
-  baseURL: BASE_URL,
+  baseURL: API_URL,
   withCredentials: true,
   headers: {
     'Content-Type': 'application/json'
@@ -29,6 +30,8 @@ api.interceptors.request.use(
 api.interceptors.response.use(
   response => response,
   error => {
+    console.log('Auth Error:', error.response?.status, error.response?.data);
+
     if (error.response) {
       switch (error.response.status) {
         case 401:
@@ -48,6 +51,10 @@ api.interceptors.response.use(
 );
 
 const authService = {
+  getCurrentUser() {
+    const user = localStorage.getItem('helpdesk_user');
+    return user ? JSON.parse(user) : null;
+  },
   async refreshToken() {
     try {
       const response = await api.post('/refresh-token');  // don't have such route in backend
@@ -80,7 +87,8 @@ const authService = {
   async login(userData) {
     try {
       const response = await api.post('/login', userData);
-      if (response.data) {
+      if (response.data && response.data.token) {
+        // Ensure all required data is stored
         localStorage.setItem('token', response.data.token);
         localStorage.setItem('helpdesk_user', JSON.stringify({
           id: response.data._id,
@@ -88,28 +96,17 @@ const authService = {
           email: response.data.email,
           role: response.data.role
         }));
-        localStorage.setItem('helpdesk_role', response.data.role);
+        return response.data;
       }
-      return {
-        user: {
-          id: response.data._id,
-          name: response.data.name,
-          email: response.data.email,
-          role: response.data.role
-        },
-        role: response.data.role
-      };
+      throw new Error('Invalid response data');
     } catch (error) {
+      localStorage.clear(); // Clear any partial data
       throw error.response?.data?.message || 'Login failed';
     }
   },
 
   logout() {
-    localStorage.removeItem('token');
-    localStorage.removeItem('helpdesk_user');
-    localStorage.removeItem('helpdesk_role');
-    // Optional: Clear any Redux store user state
-  // store.dispatch(clearUserAction());    want to implement this also   but getting error
+    localStorage.clear(); // Clear all storage
     window.location.href = '/login';
   },
 

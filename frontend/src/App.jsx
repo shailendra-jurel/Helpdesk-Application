@@ -215,6 +215,7 @@ function App() {
 
           {/* Protected Routes */}
           <Route element={<ProtectedRoute allowedRoles={['customer', 'agent', 'admin']} />}>
+          {/* < Route> */}
             <Route element={<GlobalLayout />}>
               <Route index path="/" element={<Dashboard />} />
               <Route path="/tickets" element={<TicketList />} />
@@ -224,6 +225,7 @@ function App() {
           </Route>
 
           {/* Admin Routes */}
+          {/* <Route> */}
           <Route element={<ProtectedRoute allowedRoles={['admin']} />}>
             <Route element={<GlobalLayout />}>
               <Route path="/admin" element={<AdminPanel />} />

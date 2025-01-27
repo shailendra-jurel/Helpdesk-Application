@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Link, useNavigate } from 'react-router-dom';
 import { 
@@ -15,7 +15,7 @@ const TicketList = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const { user } = useSelector((state) => state.auth);
-  const { tickets, isLoading, isError, message } = useSelector((state) => state.ticket);
+  const { tickets = [], isLoading, isError, message } = useSelector((state) => state.ticket);
 
   const [filteredTickets, setFilteredTickets] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
@@ -29,25 +29,37 @@ const TicketList = () => {
   }, [dispatch]);
 
   useEffect(() => {
-    let result = user && user.role === 'customer'
-      ? tickets.filter(ticket => ticket.userId === user._id)
-      : tickets;
+    if (!Array.isArray(tickets)) {
+      setFilteredTickets([]);
+      return;
+    }
 
-    // Search and filter logic
-    result = result.filter(ticket => 
-      ticket.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      ticket._id.toLowerCase().includes(searchTerm.toLowerCase())
-    );
+    let result = [...tickets]; // Create a copy of the tickets array
 
+    // Filter by user if customer
+    if (user?.role === 'customer') {
+      result = result.filter(ticket => ticket.userId === user._id);
+    }
+
+    // Search filter
+    if (searchTerm) {
+      result = result.filter(ticket => 
+        ticket.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        ticket._id?.toLowerCase().includes(searchTerm.toLowerCase())
+      );
+    }
+
+    // Status filter
     if (statusFilter !== 'all') {
       result = result.filter(ticket => ticket.status === statusFilter);
     }
 
+    // Priority filter
     if (priorityFilter !== 'all') {
       result = result.filter(ticket => ticket.priority === priorityFilter);
     }
 
-    // Sorting logic
+    // Sorting
     result.sort((a, b) => {
       let comparison = 0;
       if (sortBy === 'createdAt') {
@@ -69,8 +81,8 @@ const TicketList = () => {
       'closed': 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300'
     };
     return (
-      <span className={`px-2 py-1 rounded text-xs ${statusColors[status]}`}>
-        {status.replace('-', ' ')}
+      <span className={`px-2 py-1 rounded text-xs ${statusColors[status] || ''}`}>
+        {status?.replace('-', ' ')}
       </span>
     );
   };
@@ -82,7 +94,7 @@ const TicketList = () => {
       'high': 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300'
     };
     return (
-      <span className={`px-2 py-1 rounded text-xs ${priorityColors[priority]}`}>
+      <span className={`px-2 py-1 rounded text-xs ${priorityColors[priority] || ''}`}>
         {priority}
       </span>
     );
@@ -113,7 +125,7 @@ const TicketList = () => {
       <div className="flex justify-between items-center">
         <h1 className="text-3xl font-bold flex items-center dark:text-gray-200">
           <LucideClipboardList className="mr-2 text-blue-500" /> 
-          {user && user.role === 'customer' ? 'My Tickets' : 'All Tickets'}
+          {user?.role === 'customer' ? 'My Tickets' : 'All Tickets'}
         </h1>
         {user && user.role !== 'admin' && (
           <Link 
@@ -207,7 +219,7 @@ const TicketList = () => {
                   className="border-b dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer transition-colors"
                   onClick={() => navigate(`/tickets/${ticket._id}`)}
                 >
-                  <td className="p-3 font-mono dark:text-gray-300">#{ticket._id.slice(-6)}</td>
+                  <td className="p-3 font-mono dark:text-gray-300">#{ticket._id?.slice(-6)}</td>
                   <td className="p-3 dark:text-gray-300">{ticket.title}</td>
                   <td className="p-3">{renderStatusBadge(ticket.status)}</td>
                   <td className="p-3">{renderPriorityBadge(ticket.priority)}</td>

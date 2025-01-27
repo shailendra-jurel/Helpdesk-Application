@@ -30,7 +30,9 @@ const ProtectedRoute = ({ allowedRoles = [] }) => {
   const { user } = useSelector((state) => state.auth);
   const location = useLocation();
 
-  if (!user) {
+  const storedUser = localStorage.getItem('helpdesk_user');
+  
+  if (!user && !storedUser) {
     return <Navigate to="/login" state={{ from: location }} replace />;
   }
 

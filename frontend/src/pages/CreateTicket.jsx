@@ -2,20 +2,11 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import ticketService from '../services/ticketService';
-import {
-  LucideTicket,
-  LucidePlus,
-  LucideChevronLeft,
-} from "lucide-react";
+import { LucideTicket, LucidePlus, LucideChevronLeft } from 'lucide-react';
 import PropTypes from 'prop-types';
 
-const Card = ({ children, className = "", title, ...props }) => {
-  Card.propTypes = {
-    children: PropTypes.node,
-    className: PropTypes.string,
-    title: PropTypes.string
-  };
-
+// Card Component
+const Card = ({ children, className = '', title, ...props }) => {
   return (
     <div
       className={`
@@ -26,35 +17,33 @@ const Card = ({ children, className = "", title, ...props }) => {
       `}
       {...props}
     >
-      {title && <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
-        <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-200">{title}</h3>
-      </div>}
+      {title && (
+        <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
+          <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-200">
+            {title}
+          </h3>
+        </div>
+      )}
       {children}
     </div>
   );
 };
 
-const Button = ({
-  children,
-  variant = "primary",
-  className = "",
-  icon: Icon,
-  ...props
-}) => {
-  Button.propTypes = {
-    children: PropTypes.node.isRequired,
-    variant: PropTypes.oneOf(['primary', 'secondary', 'outline']),
-    className: PropTypes.string,
-    icon: PropTypes.elementType,
-  };
-  
+Card.propTypes = {
+  children: PropTypes.node,
+  className: PropTypes.string,
+  title: PropTypes.string,
+};
+
+// Button Component
+const Button = ({ children, variant = 'primary', className = '', icon: Icon, ...props }) => {
   const variants = {
     primary:
-      "bg-blue-600 text-white hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600",
+      'bg-blue-600 text-white hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600',
     secondary:
-      "bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200 hover:bg-gray-200 dark:hover:bg-gray-600",
+      'bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200 hover:bg-gray-200 dark:hover:bg-gray-600',
     outline:
-      "border border-gray-300 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700",
+      'border border-gray-300 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700',
   };
 
   return (
@@ -72,26 +61,34 @@ const Button = ({
   );
 };
 
+Button.propTypes = {
+  children: PropTypes.node.isRequired,
+  variant: PropTypes.oneOf(['primary', 'secondary', 'outline']),
+  className: PropTypes.string,
+  icon: PropTypes.elementType,
+};
+
+// CreateTicket Component
 const CreateTicket = () => {
   const [formData, setFormData] = useState({
     title: '',
     description: '',
-    priority: 'medium'
+    priority: 'medium',
   });
 
-  const [templateSuggestions, setTemplateSuggestions] = useState([
+  const [templateSuggestions] = useState([
     {
       title: 'Hardware Issue',
-      description: 'My computer is not turning on. Please help me diagnose the problem.'
+      description: 'My computer is not turning on. Please help me diagnose the problem.',
     },
     {
       title: 'Software Bug',
-      description: 'I encountered an unexpected error while using the application.'
+      description: 'I encountered an unexpected error while using the application.',
     },
     {
       title: 'Access Request',
-      description: 'I need access to a specific system or resource for my work.'
-    }
+      description: 'I need access to a specific system or resource for my work.',
+    },
   ]);
 
   const navigate = useNavigate();
@@ -102,15 +99,26 @@ const CreateTicket = () => {
   const onChange = (e) => {
     setFormData((prevState) => ({
       ...prevState,
-      [e.target.name]: e.target.value
+      [e.target.name]: e.target.value,
     }));
+  };
+
+  const validateForm = () => {
+    if (!title.trim()) {
+      toast.error('Title is required');
+      return false;
+    }
+    if (!description.trim()) {
+      toast.error('Description is required');
+      return false;
+    }
+    return true;
   };
 
   const onSubmit = async (e) => {
     e.preventDefault();
-    
-    if (!title || !description) {
-      toast.error('Please fill in all fields');
+
+    if (!validateForm()) {
       return;
     }
 
@@ -119,7 +127,7 @@ const CreateTicket = () => {
       const newTicket = await ticketService.createTicket({
         title,
         description,
-        priority
+        priority,
       });
 
       toast.success('Ticket created successfully');
@@ -135,7 +143,7 @@ const CreateTicket = () => {
     setFormData({
       ...formData,
       title: template.title,
-      description: template.description
+      description: template.description,
     });
   };
 
@@ -144,9 +152,9 @@ const CreateTicket = () => {
       <main className="flex-1 p-6 overflow-y-auto">
         <header className="flex justify-between items-center mb-6">
           <div className="flex items-center space-x-4">
-            <Button 
-              variant="outline" 
-              icon={LucideChevronLeft} 
+            <Button
+              variant="outline"
+              icon={LucideChevronLeft}
               onClick={() => navigate('/dashboard')}
             />
             <h1 className="text-3xl font-bold">Create Ticket</h1>
@@ -216,8 +224,8 @@ const CreateTicket = () => {
             <Card title="Quick Templates" className="p-4">
               <div className="space-y-3">
                 {templateSuggestions.map((template, index) => (
-                  <div 
-                    key={index} 
+                  <div
+                    key={index}
                     className="bg-gray-50 dark:bg-gray-700 p-3 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-600 cursor-pointer transition"
                     onClick={() => useTemplate(template)}
                   >

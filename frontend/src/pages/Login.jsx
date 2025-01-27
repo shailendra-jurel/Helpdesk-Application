@@ -96,16 +96,23 @@ const Login = () => {
     }));
   };
 
+  useEffect(() => {
+    // Clear any stale data on login page mount
+    localStorage.clear();
+  }, []);
+
   const onSubmit = async (e) => {
     e.preventDefault();
     setError('');
 
-    const userData = { email, password };
     try {
-      await dispatch(login(userData)).unwrap();
-      navigate('/');
+      const userData = { email, password };
+      const result = await dispatch(login(userData)).unwrap();
+      if (result?.token) {
+        navigate('/');
+      }
     } catch (error) {
-      setError(error);
+      setError(error.toString());
     }
   };
 
